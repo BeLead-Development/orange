@@ -25,7 +25,7 @@ import {
 } from '~/utils/openai.server'
 
 const alarmInterval = 15_000
-const defaultOpenAIModelID = 'gpt-4o-realtime-preview-2024-10-01'
+const defaultOpenAIModelID = 'gpt-4o-mini-realtime-preview'
 
 /**
  * The ChatRoom Durable Object Class
