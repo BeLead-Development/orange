@@ -1,4 +1,4 @@
-name = "orange-meets"
+name = "belead-meets"
 # https://developers.cloudflare.com/workers/platform/compatibility-dates
 compatibility_date = "2024-10-07"
 main = "./build/index.js"
@@ -8,10 +8,11 @@ compatibility_flags = ["nodejs_compat"]
   bucket = "./public"
 
 [vars]
-CALLS_APP_ID = "YOUR_CALLS_SFU_APP_ID_HERE"
+CALLS_APP_ID = "c81a668b71372c891ecaf3e8a78e1d2b"
 
 # Optional vars
-# OPENAI_MODEL_ENDPOINT = ""
+OPENAI_MODEL_ENDPOINT = "https://api.openai.com/v1/realtime"
+OPENAI_MODEL_ID = "gpt-4o-mini-realtime-preview"
 
 [[durable_objects.bindings]]
 name = "rooms"

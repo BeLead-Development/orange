@@ -13,17 +13,9 @@ export const Disclaimer: FC<DisclaimerProps> = ({ className }) => {
 				className
 			)}
 		>
-			Orange Meets is a demo application built using{' '}
+			BeLead Meets is a demo application based on Orange Meets built using{' '}
 			<a className="underline" href="https://developers.cloudflare.com/calls/">
 				Cloudflare Calls
-			</a>
-			. To build your own WebRTC application using Cloudflare Calls, get started
-			in the{' '}
-			<a
-				className="underline"
-				href="https://dash.cloudflare.com/?to=/:account/calls"
-			>
-				Cloudflare Dashboard
 			</a>
 			.
 		</p>
