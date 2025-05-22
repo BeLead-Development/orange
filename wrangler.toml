@@ -18,10 +18,9 @@ OPENAI_MODEL_ID = "gpt-4o-mini-realtime-preview"
 name = "rooms"
 class_name = "ChatRoom"
 
-# Indicate that you want the ChatRoom class to be callable as Durable Objects.
 [[migrations]]
-tag = "v1" # Should be unique for each entry
-new_classes = ["ChatRoom"]
+tag = "v1"                     # Identifiant unique de cette migration
+new_sqlite_classes = ["ChatRoom"]  # Votre classe Durable Object
 
 # The necessary secrets are:
 # - CALLS_APP_SECRET
