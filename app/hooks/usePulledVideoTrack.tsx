@@ -4,8 +4,11 @@ import { of, switchMap } from 'rxjs'
 import { useRoomContext } from '~/hooks/useRoomContext'
 import type { TrackObject } from '~/utils/callsTypes'
 
-export function usePulledVideoTrack(video: string | undefined) {
-	const { partyTracks } = useRoomContext()
+export function usePulledVideoTrack(
+	video: string | undefined,
+	preferredRid?: string
+) {
+	const { partyTracks, simulcastEnabled } = useRoomContext()
 
 	const [sessionId, trackName] = video?.split('/') ?? []
 	const trackObject = useMemo(
@@ -20,15 +23,21 @@ export function usePulledVideoTrack(video: string | undefined) {
 		[sessionId, trackName]
 	)
 
+	const preferredRid$ = useValueAsObservable(preferredRid)
 	const trackObject$ = useValueAsObservable(trackObject)
 	const pulledTrack$ = useMemo(
 		() =>
 			trackObject$.pipe(
 				switchMap((track) =>
-					track ? partyTracks.pull(of(track)) : of(undefined)
+					track
+						? partyTracks.pull(
+								of(track),
+								simulcastEnabled ? { simulcast: { preferredRid$ } } : undefined
+							)
+						: of(undefined)
 				)
 			),
-		[partyTracks, trackObject$]
+		[partyTracks, trackObject$, preferredRid$]
 	)
 	return useObservableAsValue(pulledTrack$)
 }

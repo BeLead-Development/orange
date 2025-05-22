@@ -12,12 +12,14 @@ import { Spinner } from '~/components/Spinner'
 
 import { usePeerConnection } from '~/hooks/usePeerConnection'
 import useRoom from '~/hooks/useRoom'
-import type { RoomContextType } from '~/hooks/useRoomContext'
+import { type RoomContextType } from '~/hooks/useRoomContext'
 import { useRoomHistory } from '~/hooks/useRoomHistory'
 import { useStablePojo } from '~/hooks/useStablePojo'
 import useUserMedia from '~/hooks/useUserMedia'
 import type { TrackObject } from '~/utils/callsTypes'
+import { useE2EE } from '~/utils/e2ee'
 import { getIceServers } from '~/utils/getIceServers.server'
+import { mode } from '~/utils/mode'
 
 function numberOrUndefined(value: unknown): number | undefined {
 	const num = Number(value)
@@ -38,6 +40,7 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
 			MAX_WEBCAM_BITRATE,
 			MAX_WEBCAM_QUALITY_LEVEL,
 			MAX_API_HISTORY,
+			EXPERIMENTAL_SIMULCAST_ENABLED,
 		},
 	} = context
 
@@ -55,6 +58,8 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
 		maxWebcamBitrate: numberOrUndefined(MAX_WEBCAM_BITRATE),
 		maxWebcamQualityLevel: numberOrUndefined(MAX_WEBCAM_QUALITY_LEVEL),
 		maxApiHistory: numberOrUndefined(MAX_API_HISTORY),
+		simulcastEnabled: EXPERIMENTAL_SIMULCAST_ENABLED === 'true',
+		e2eeEnabled: context.env.E2EE_ENABLED === 'true',
 	})
 }
 
@@ -95,20 +100,11 @@ function RoomPreparation() {
 }
 
 function tryToGetDimensions(videoStreamTrack?: MediaStreamTrack) {
-	if (
-		videoStreamTrack === undefined ||
-		// TODO: Determine a better way to get dimensions in Firefox
-		// where this isn't API isn't supported. For now, Firefox will
-		// just not be constrained and scaled down by dimension scaling
-		// but the bandwidth and framerate constraints will still apply
-		// https://caniuse.com/?search=getCapabilities
-		videoStreamTrack.getCapabilities === undefined
-	) {
+	if (videoStreamTrack === undefined) {
 		return { height: 0, width: 0 }
 	}
-	const height = videoStreamTrack?.getCapabilities().height?.max ?? 0
-	const width = videoStreamTrack?.getCapabilities().width?.max ?? 0
-
+	const height = videoStreamTrack?.getSettings().height ?? 0
+	const width = videoStreamTrack?.getSettings().width ?? 0
 	return { height, width }
 }
 
@@ -120,6 +116,7 @@ interface RoomProps {
 function Room({ room, userMedia }: RoomProps) {
 	const [joined, setJoined] = useState(false)
 	const [dataSaverMode, setDataSaverMode] = useState(false)
+	const [audioOnlyMode, setAudioOnlyMode] = useState(false)
 	const { roomName } = useParams()
 	invariant(roomName)
 
@@ -129,10 +126,12 @@ function Room({ room, userMedia }: RoomProps) {
 		feedbackEnabled,
 		apiExtraParams,
 		iceServers,
-		maxWebcamBitrate = 1_200_000,
+		maxWebcamBitrate = 2_500_000,
 		maxWebcamFramerate = 24,
 		maxWebcamQualityLevel = 1080,
 		maxApiHistory = 100,
+		simulcastEnabled,
+		e2eeEnabled,
 	} = useLoaderData<typeof loader>()
 
 	const params = new URLSearchParams(apiExtraParams)
@@ -148,39 +147,56 @@ function Room({ room, userMedia }: RoomProps) {
 	const roomHistory = useRoomHistory(partyTracks, room)
 
 	const scaleResolutionDownBy = useMemo(() => {
+		if (dataSaverMode) return 4
 		const videoStreamTrack = userMedia.videoStreamTrack
 		const { height, width } = tryToGetDimensions(videoStreamTrack)
 		// we need to do this in case camera is in portrait mode
 		const smallestDimension = Math.min(height, width)
 		return Math.max(smallestDimension / maxWebcamQualityLevel, 1)
-	}, [maxWebcamQualityLevel, userMedia.videoStreamTrack])
+	}, [maxWebcamQualityLevel, userMedia.videoStreamTrack, dataSaverMode])
 
-	const videoEncodingParams = useStablePojo<RTCRtpEncodingParameters[]>([
-		{
-			maxFramerate: maxWebcamFramerate,
-			maxBitrate: maxWebcamBitrate,
-			scaleResolutionDownBy,
-		},
-	])
-	const videoTrackEncodingParams$ =
-		useValueAsObservable<RTCRtpEncodingParameters[]>(videoEncodingParams)
+	const sendEncodings = useStablePojo<RTCRtpEncodingParameters[]>(
+		simulcastEnabled
+			? [
+					{
+						rid: 'a',
+						maxBitrate: 1_300_000,
+						maxFramerate: 30.0,
+						active: !dataSaverMode,
+					},
+					{
+						rid: 'b',
+						scaleResolutionDownBy: 2.0,
+						maxBitrate: 500_000,
+						maxFramerate: 24.0,
+						active: true,
+					},
+				]
+			: [
+					{
+						maxFramerate: maxWebcamFramerate,
+						maxBitrate: maxWebcamBitrate,
+						scaleResolutionDownBy,
+					},
+				]
+	)
+	const sendEncodings$ = useValueAsObservable(sendEncodings)
+
 	const pushedVideoTrack$ = useMemo(
-		() => partyTracks.push(userMedia.videoTrack$, videoTrackEncodingParams$),
-		[partyTracks, userMedia.videoTrack$, videoTrackEncodingParams$]
+		() =>
+			partyTracks.push(userMedia.videoTrack$, {
+				sendEncodings$,
+			}),
+		[partyTracks, userMedia.videoTrack$, sendEncodings$]
 	)
 
 	const pushedVideoTrack = useObservableAsValue(pushedVideoTrack$)
 
 	const pushedAudioTrack$ = useMemo(
 		() =>
-			partyTracks.push(
-				userMedia.publicAudioTrack$,
-				of<RTCRtpEncodingParameters[]>([
-					{
-						networkPriority: 'high',
-					},
-				])
-			),
+			partyTracks.push(userMedia.publicAudioTrack$, {
+				sendEncodings$: of([{ networkPriority: 'high' }]),
+			}),
 		[partyTracks, userMedia.publicAudioTrack$]
 	)
 	const pushedAudioTrack = useObservableAsValue(pushedAudioTrack$)
@@ -196,7 +212,13 @@ function Room({ room, userMedia }: RoomProps) {
 		pushedScreenSharingTrack$
 	)
 	const [pinnedTileIds, setPinnedTileIds] = useState<string[]>([])
-	const [showDebugInfo, setShowDebugInfo] = useState(false)
+	const [showDebugInfo, setShowDebugInfo] = useState(mode !== 'production')
+
+	const { e2eeSafetyNumber, onJoin } = useE2EE({
+		enabled: e2eeEnabled,
+		room,
+		partyTracks,
+	})
 
 	const context: RoomContextType = {
 		joined,
@@ -207,14 +229,19 @@ function Room({ room, userMedia }: RoomProps) {
 		setShowDebugInfo,
 		dataSaverMode,
 		setDataSaverMode,
+		audioOnlyMode,
+		setAudioOnlyMode,
 		traceLink,
 		userMedia,
 		userDirectoryUrl,
 		feedbackEnabled,
-		partyTracks: partyTracks,
+		partyTracks,
 		roomHistory,
+		e2eeSafetyNumber,
+		e2eeOnJoin: onJoin,
 		iceConnectionState,
 		room,
+		simulcastEnabled,
 		pushedTracks: {
 			video: trackObjectToString(pushedVideoTrack),
 			audio: trackObjectToString(pushedAudioTrack),

@@ -5,7 +5,6 @@ import { combineLatest, map, of, shareReplay, switchMap, tap } from 'rxjs'
 import invariant from 'tiny-invariant'
 import { blackCanvasStreamTrack } from '~/utils/blackCanvasStreamTrack'
 import blurVideoTrack from '~/utils/blurVideoTrack'
-import { mode } from '~/utils/mode'
 import noiseSuppression from '~/utils/noiseSuppression'
 import { prependDeviceToPrioritizeList } from '~/utils/rxjs/devicePrioritization'
 import { getScreenshare$ } from '~/utils/rxjs/getScreenshare$'
@@ -30,7 +29,16 @@ export default function useUserMedia() {
 		'suppress-noise',
 		false
 	)
-	const [audioEnabled, setAudioEnabled] = useState(mode === 'production')
+	// NOTE: in the past we've set this to be false by default in dev
+	// but as long as we're using the web audio API to generate an inaudible
+	// audio track we shouldn't do this because the audio track will not have
+	// any packets flowing out over the peer connection if the audio context
+	// fails to initialize due to no prior user interaction. If we need
+	// to require user interaction, we might as well have that interaction
+	// be for the user to manually mute themselves and not have to work around
+	// this. Once Calls is handling audio tracks with no data flowing better
+	// we should be able to go back to muting by default in dev.
+	const [audioEnabled, setAudioEnabled] = useState(true)
 	const [videoEnabled, setVideoEnabled] = useState(true)
 	const [screenShareEnabled, setScreenShareEnabled] = useState(false)
 	const [videoUnavailableReason, setVideoUnavailableReason] =
@@ -47,43 +55,41 @@ export default function useUserMedia() {
 
 	const blurVideo$ = useValueAsObservable(blurVideo)
 	const videoEnabled$ = useValueAsObservable(videoEnabled)
-	const videoTrack$ = useMemo(
-		() =>
-			combineLatest([
-				videoEnabled$.pipe(
-					switchMap((enabled) =>
-						enabled
-							? getUserMediaTrack$('videoinput').pipe(
-									tap({
-										error: (e) => {
-											invariant(e instanceof Error)
-											const reason =
-												e.name in errorMessageMap
-													? (e.name as UserMediaError)
-													: 'UnknownError'
-											if (reason === 'UnknownError') {
-												console.error('Unknown error getting video track: ', e)
-											}
-											setVideoUnavailableReason(reason)
-											setVideoEnabled(false)
-										},
-									})
-								)
-							: of(blackCanvasStreamTrack())
-					)
-				),
-				blurVideo$,
-			]).pipe(
-				switchMap(([track, blur]) =>
-					blur && track ? blurVideoTrack(track) : of(track)
-				),
-				shareReplay({
-					refCount: true,
-					bufferSize: 1,
-				})
+	const videoTrack$ = useMemo(() => {
+		const track$ = videoEnabled$.pipe(
+			switchMap((enabled) =>
+				enabled
+					? getUserMediaTrack$('videoinput').pipe(
+							tap({
+								error: (e) => {
+									invariant(e instanceof Error)
+									const reason =
+										e.name in errorMessageMap
+											? (e.name as UserMediaError)
+											: 'UnknownError'
+									if (reason === 'UnknownError') {
+										console.error('Unknown error getting video track: ', e)
+									}
+									setVideoUnavailableReason(reason)
+									setVideoEnabled(false)
+								},
+							})
+						)
+					: of(undefined)
+			)
+		)
+		return combineLatest([blurVideo$, track$]).pipe(
+			switchMap(([blur, track]) =>
+				blur && track
+					? blurVideoTrack(track)
+					: of(track ?? blackCanvasStreamTrack())
 			),
-		[videoEnabled$, blurVideo$]
-	)
+			shareReplay({
+				refCount: true,
+				bufferSize: 1,
+			})
+		)
+	}, [videoEnabled$, blurVideo$])
 	const videoTrack = useObservableAsValue(videoTrack$)
 	const videoDeviceId = videoTrack?.getSettings().deviceId
 
