@@ -69,8 +69,8 @@ export const Option = forwardRef<HTMLDivElement, RadixSelect.SelectItemProps>(
 				'data-[disabled]:pointer-events-none',
 				'data-[disabled]:text-zinc-500',
 				'data-[highlighted]:outline-none',
-				'data-[highlighted]:bg-orange-300',
-				'dark:data-[highlighted]:bg-orange-500',
+				'data-[highlighted]:bg-blue-300',
+				'dark:data-[highlighted]:bg-blue-500',
 				className
 			)}
 			{...props}

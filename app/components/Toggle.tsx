@@ -10,7 +10,7 @@ export const Toggle: FC<RadixSwitch.SwitchProps> = ({ className, ...rest }) => (
 			'bg-zinc-600',
 			'rounded-full',
 			'relative',
-			'data-[state=checked]:bg-orange-400',
+			'data-[state=checked]:bg-blue-400',
 			className
 		)}
 		{...rest}

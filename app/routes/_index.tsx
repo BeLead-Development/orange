@@ -50,7 +50,7 @@ export default function Index() {
 						)}
 					</div>
 				</div>
-				<div>
+				{data?.displayName == "Miguel" && (<div>
 					<ButtonLink
 						to="/new"
 						className="text-sm"
@@ -67,7 +67,8 @@ export default function Index() {
 						New Room
 					</ButtonLink>
 				</div>
-				<details className="cursor-pointer">
+                )}
+				{/* <details className="cursor-pointer">
 					<summary className="text-zinc-500 dark:text-zinc-400">
 						Or join a room
 					</summary>
@@ -83,7 +84,19 @@ export default function Index() {
 							Join
 						</Button>
 					</Form>
-				</details>
+				</details> */}
+                <Form
+                    className="grid items-end gap-4 grid-cols-[1fr_auto] w-full pt-4"
+                    method="post"
+                >
+                    <div className="space-y-2">
+                        <Label htmlFor="room">Room name</Label>
+                        <Input name="room" id="room" required />
+                    </div>
+                    <Button className="text-xs" type="submit" displayType="secondary">
+                        Join
+                    </Button>
+                </Form>
 			</div>
 			<div className="flex flex-col justify-end flex-1">
 				<Disclaimer className="pt-6" />

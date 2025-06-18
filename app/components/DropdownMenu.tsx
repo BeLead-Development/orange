@@ -63,7 +63,7 @@ const Item = forwardRef<HTMLDivElement, DropdownMenu.DropdownMenuItemProps>(
 				'data-[disabled]:text-zinc-600',
 				'data-[disabled]:cursor-not-allowed',
 				'dark:data-[disabled]:text-zinc-400',
-				'data-[highlighted]:bg-orange-500',
+				'data-[highlighted]:bg-blue-500',
 				'data-[highlighted]:text-white',
 				className
 			)}

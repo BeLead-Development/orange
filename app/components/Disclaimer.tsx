@@ -13,11 +13,7 @@ export const Disclaimer: FC<DisclaimerProps> = ({ className }) => {
 				className
 			)}
 		>
-			BeLead Meets is a demo application based on Orange Meets built using{' '}
-			<a className="underline" href="https://developers.cloudflare.com/calls/">
-				Cloudflare Calls
-			</a>
-			.
+			BeLead Meets is still in development and may contain bugs or inaccuracies.
 		</p>
 	)
 }

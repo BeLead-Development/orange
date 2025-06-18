@@ -196,10 +196,10 @@ function JoinedRoom({ bugReportsEnabled }: { bugReportsEnabled: boolean }) {
 					<MicButton warnWhenSpeakingWhileMuted />
 					<CameraButton />
 					<ScreenshareButton />
-					<RaiseHandButton
+					{/* <RaiseHandButton
 						raisedHand={raisedHand}
 						onClick={() => setRaisedHand(!raisedHand)}
-					/>
+					/> */}
 					<ParticipantsButton
 						identity={identity}
 						otherUsers={otherUsers}
