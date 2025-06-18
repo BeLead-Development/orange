@@ -20,7 +20,7 @@ import { OverflowMenu } from '~/components/OverflowMenu'
 import { ParticipantLayout } from '~/components/ParticipantLayout'
 import { ParticipantsButton } from '~/components/ParticipantsMenu'
 import { PullAudioTracks } from '~/components/PullAudioTracks'
-import { RaiseHandButton } from '~/components/RaiseHandButton'
+// import { RaiseHandButton } from '~/components/RaiseHandButton'
 import { SafetyNumberToast } from '~/components/SafetyNumberToast'
 import { ScreenshareButton } from '~/components/ScreenshareButton'
 import Toast, { useDispatchToast } from '~/components/Toast'
@@ -104,7 +104,7 @@ function JoinedRoom({ bugReportsEnabled }: { bugReportsEnabled: boolean }) {
 
 	useShowDebugInfoShortcut()
 
-	const [raisedHand, setRaisedHand] = useState(false)
+	const [raisedHand/* , setRaisedHand */] = useState(false)
 	const speaking = useIsSpeaking(userMedia.audioStreamTrack)
 
 	useMount(() => {
