@@ -13,7 +13,7 @@ export const Disclaimer: FC<DisclaimerProps> = ({ className }) => {
 				className
 			)}
 		>
-			BeLead Meets is still in development and may contain bugs or inaccuracies.
+			BeLead Meet is still in development and may contain bugs or inaccuracies.
 		</p>
 	)
 }
