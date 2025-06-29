@@ -21,6 +21,3 @@ new_sqlite_classes = ["ChatRoom"]  # Votre classe Durable Object
 # The necessary secrets are:
 # - CALLS_APP_SECRET
 # To add secret, run `echo <VALUE> | wrangler secret put <NAME>`
-
-# Optional secrets:
-# OPENAI_API_TOKEN = ""

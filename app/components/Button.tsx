@@ -10,9 +10,9 @@ const displayTypeMap = {
 		'border-indigo-500 hover:border-indigo-600 active:border-indigo-700 active:border-indigo-800',
 	],
 	secondary: [
-		'text-zinc-900 dark:text-zinc-100',
-		'bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-700 dark:hover:bg-zinc-600 active:bg-zinc-400 dark:active:bg-zinc-700',
-		'border-zinc-200 hover:border-zinc-300 dark:border-zinc-700 dark:hover:border-zinc-600',
+		'text-slate-900',
+		'bg-white hover:bg-zinc-200 active:bg-zinc-400',
+		'border-white hover:border-zinc-200 active:border-zinc-400',
 	],
 	ghost: [
 		'text-white hover:text-zinc-900',
