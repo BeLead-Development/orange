@@ -5,6 +5,7 @@ export type Env = {
 	CALLS_API_URL?: string
     API: Fetcher
 
+	DISABLE_LOBBY_ENFORCEMENT?: string
 	USER_DIRECTORY_URL?: string
 	MAX_WEBCAM_FRAMERATE?: string
 	MAX_WEBCAM_BITRATE?: string

@@ -36,6 +36,7 @@ export const loader = async ({ request, context }: LoaderFunctionArgs) => {
 
 	return json({
 		username,
+		disableLobbyEnforcement: context.env.DISABLE_LOBBY_ENFORCEMENT === 'true',
 		mode: context.mode,
 	})
 }
@@ -44,15 +45,16 @@ export default function Room() {
 	const { joined } = useRoomContext()
 	const navigate = useNavigate()
 	const { roomName } = useParams()
-	const { mode } = useLoaderData<typeof loader>()
+	const { mode, disableLobbyEnforcement } =
+		useLoaderData<typeof loader>()
 	const [search] = useSearchParams()
 
 	useEffect(() => {
-		if (!joined && mode !== 'development')
+		if (!joined && mode !== 'development' && !disableLobbyEnforcement)
 			navigate(`/${roomName}${search.size > 0 ? '?' + search.toString() : ''}`)
-	}, [joined, mode, navigate, roomName, search])
+	}, [joined, mode, navigate, roomName, search, disableLobbyEnforcement])
 
-	if (!joined && mode !== 'development') return null
+	if (!joined && mode !== 'development' && !disableLobbyEnforcement) return null
 
 	return (
 		<Toast.Provider>
@@ -111,8 +113,8 @@ function JoinedRoom() {
 	const { width } = useWindowSize()
 
 	const someScreenshare =
-		otherUsers.some((u) => u.tracks.screenshare) ||
-		Boolean(identity?.tracks.screenshare)
+		otherUsers.some((u) => u.tracks.screenShareEnabled) ||
+		Boolean(identity?.tracks.screenShareEnabled)
 	const stageLimit = width < 600 ? 2 : someScreenshare ? 5 : 9
 
 	const { recordActivity, actorsOnStage } = useStageManager(
