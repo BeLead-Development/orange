@@ -4,6 +4,7 @@ export type Env = {
 	CALLS_APP_SECRET: string
 	CALLS_API_URL?: string
     API: Fetcher
+    INTERNAL_KEY: string
 
 	DISABLE_LOBBY_ENFORCEMENT?: string
 	USER_DIRECTORY_URL?: string

@@ -96,7 +96,7 @@ export default function useUserMedia() {
 	const micDevices = useObservableAsValue(mic.devices$, [])
 	const cameraDevices = useObservableAsValue(camera.devices$, [])
 
-	useObservable(mic.error$, (e) => {
+	useObservable(mic.error$, (e: any) => {
 		const reason =
 			e.name in errorMessageMap ? (e.name as UserMediaError) : 'UnknownError'
 		if (reason === 'UnknownError') {
@@ -106,7 +106,7 @@ export default function useUserMedia() {
 		mic.stopBroadcasting()
 	})
 
-	useObservable(camera.error$, (e) => {
+	useObservable(camera.error$, (e: any) => {
 		const reason =
 			e.name in errorMessageMap ? (e.name as UserMediaError) : 'UnknownError'
 		if (reason === 'UnknownError') {

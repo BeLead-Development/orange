@@ -35,6 +35,19 @@ export default function useRoom({
 				case 'error':
 					console.error('Received error message from WebSocket')
 					console.error(message.error)
+                    if (message.error === 'Room invalid') {
+                        websocket.close(4004, 'Meeting no longer active')
+                        window.location.href = '/?error=meeting-not-found'
+                        return
+                    }
+                    window.dispatchEvent(
+                        new CustomEvent('toast', {
+                            detail: {
+                                type: 'error',
+                                message: `Error: ${message.error}`,
+                            },
+                        })
+                    )
 					break
 				case 'directMessage':
 					break

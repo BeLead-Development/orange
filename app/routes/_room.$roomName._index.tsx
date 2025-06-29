@@ -37,9 +37,10 @@ function trackRefreshes() {
 	sessionStorage.setItem(key, Date.now().toString())
 
 	if (refreshed) {
-		fetch(`/api/reportRefresh`, {
+		/* fetch(`/api/reportRefresh`, {
 			method: 'POST',
-		})
+		}) */
+    console.warn('Page was refreshed, this is not expected behavior. Please report this issue.');
 	}
 
 	refreshCheckDone = true

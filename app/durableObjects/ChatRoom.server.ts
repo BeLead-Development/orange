@@ -38,11 +38,62 @@ export class ChatRoom extends Server<Env> {
 		connection.send(JSON.stringify(message))
 	}
 
-	async onStart(): Promise<void> {
-		const meetingId = await this.getMeetingId()
-		log({ eventName: 'onStart', meetingId })
+    async isRoomValid(env: Env, roomCode: string | null): Promise<Response> {
+        if (!roomCode) return new Response('Room code is null', { status: 400 });
+        // todo check sub-worker usage
+        const resp = await /* env.API. */fetch(
+            `https://api.belead.io/meeting/room/${roomCode}`,         // host inutile pour un service binding
+            {
+                method: 'GET',
+                headers: {
+                    'x-internal-key': `${env.INTERNAL_KEY}`,
+                    'Content-Type': 'application/json',
+                },
+            },
+        );
 
-        // TODO: call belead API to check if the meeting is still valid and user is allowed to join
+        console.log(`isRoomValid response: ${resp.status} ${resp.statusText}`);
+
+        return resp
+    }
+
+    async  updateMeetingStats(
+        env: Env,
+        roomId: string,
+        payload: { peakUsers: number; status: 'done' | 'started' },
+    ) {
+        // todo check sub-worker usage
+        const resp = await /* env.API. */fetch(
+            `https://api.belead.io/meeting/room/${roomId}`,
+            {
+                method: 'POST',
+                headers: {
+                    'content-type': 'application/json',
+                    'x-internal-key': env.INTERNAL_KEY,
+                },
+                body: JSON.stringify(payload),
+            },
+        );
+
+        return resp.ok
+    }
+
+	async onStart(): Promise<void> {
+       const roomCode = await this.ctx.storage.get<string>('roomCode');
+        if (!roomCode) {
+            console.warn('roomCode absent – onStart devrait tourner après onConnect');
+            return;
+        }
+
+        const valid = await this.isRoomValid(this.env, roomCode);
+        console.log(`Room code "${roomCode}" validity check: ${valid}`);
+
+        if (!valid.ok) {
+            await this.ctx.storage.deleteAlarm();
+            for (const c of this.getConnections()) c.close(4004, 'Room invalid');
+            await this.ctx.storage.deleteAll();
+            return;
+        }
 
         // TODO: make this a part of partyserver
 		// this.ctx.setWebSocketAutoResponse(
@@ -53,10 +104,41 @@ export class ChatRoom extends Server<Env> {
 		// )
 	}
 
+    extractRoomCode(urlStr: string): string | null {
+        const segments = new URL(urlStr).pathname.split('/');
+        const idx = segments.indexOf('rooms');
+        return idx !== -1 && idx + 1 < segments.length ? segments[idx + 1] : null;
+    }
+
+    getRoomCode(): Promise<string | undefined> {
+        return this.ctx.storage.get<string>('roomCode');
+    }
+
 	async onConnect(
 		connection: Connection<User>,
 		ctx: ConnectionContext
 	): Promise<void> {
+        const roomCode = this.extractRoomCode(ctx.request.url);
+        if (roomCode && !(await this.ctx.storage.get('roomCode'))) {
+            console.log(`New room code detected: ${roomCode}`);
+            await this.ctx.storage.put('roomCode', roomCode);   // on le mémorise
+        }
+        // check room code validity
+        const validRoom = await this.isRoomValid(this.env, roomCode)
+        if (!validRoom.ok) {
+            // send a close message the the client
+            console.warn(`Invalid or finished room, closing connection for room: ${roomCode}`)
+            connection.send(
+                JSON.stringify({
+                    type: 'error',
+                    error: 'Room invalid',
+                } satisfies ServerMessage)
+            )
+            connection.close(4004, 'Meeting room no longer active')
+            return
+        }
+        const meetingId = await this.getMeetingId()
+
 		// let's start the periodic alarm if it's not already started
 		if (!(await this.ctx.storage.getAlarm())) {
 			// start the alarm to broadcast state every 30 seconds
@@ -89,7 +171,6 @@ export class ChatRoom extends Server<Env> {
 		await this.ctx.storage.put(`heartbeat-${connection.id}`, Date.now())
 		await this.trackPeakUserCount()
 		await this.broadcastRoomState()
-		const meetingId = await this.getMeetingId()
 		log({
 			eventName: 'onConnect',
 			meetingId,
@@ -104,25 +185,19 @@ export class ChatRoom extends Server<Env> {
 			? await this.getMeeting(meetingId)
 			: await this.createMeeting()
 		await this.cleanupOldConnections()
-        if (!meeting) return
-        if (meeting.ended !== null) {
-            /* await this.db
-                .update(Meetings)
-                .set({ ended: null })
-                .where(eq(Meetings.id, meeting.id)) */
-            // TODO: set meeting as not ended
+        if (!meeting) {
+            console.warn('No meeting found or created, cannot track peak user count')
+            return
         }
 
         const previousCount = meeting.peakUserCount
         const userCount = (await this.getUsers()).size
-        if (userCount > previousCount) {
-            // TODO: update peakUserCount in the database
-            /* await this.db
-                .update(Meetings)
-                .set({
-                    peakUserCount: userCount,
-                })
-                .where(eq(Meetings.id, meeting.id)) */
+        if (userCount > previousCount || meeting.ended !== null) {
+            await this.updateMeetingStats(
+                this.env,
+                meeting.roomId,
+                { peakUsers: meeting.peakUserCount, status: 'started' },
+            )
         }
 		return meetingId
 	}
@@ -131,36 +206,43 @@ export class ChatRoom extends Server<Env> {
 		return this.ctx.storage.get<string>('meetingId')
 	}
 
-	async createMeeting() {
-		const meetingId = crypto.randomUUID()
+	async createMeeting(): Promise<any> {
+        const meetingId = crypto.randomUUID()
 		await this.ctx.storage.put('meetingId', meetingId)
 		log({ eventName: 'startingMeeting', meetingId })
-        // todo : je sais pas sah je crois que cette fonction va sauter
-		/* if (this.db) {
-			return this.db
-				.insert(Meetings)
-				.values({
-					id: meetingId,
-					peakUserCount: 1,
-				})
-				.returning()
-				.then(([m]) => m)
-		} */
+        return this.getMeeting(meetingId)
 	}
 
 	async getMeeting(meetingId: string) {
-		/* if (!this.db) return null
-		const [meeting] = await this.db
-			.select()
-			.from(Meetings)
-			.where(eq(Meetings.id, meetingId)) */
-        // todo: return data about the meeting
+        const roomCode = await this.getRoomCode()
+        if (!roomCode) {
+            console.warn('No room code found, cannot get meeting')
+            return null
+        }
+        const meeting = await this.isRoomValid(this.env, roomCode)
+
+        if (!meeting.ok) {
+            console.warn(`Meeting with id ${meetingId} not found or invalid`)
+            return null
+        }
+        const response = await meeting.json() as {
+            data: {
+                roomId: string
+                peakUsers: number
+                status: 'planned' | 'started' | 'done' | 'cancelled' | 'no_show'
+            }
+        }
+        if (!response) {
+            console.warn(`No response body found for meeting with id ${meetingId}`)
+            return null
+        }
 
 		return {
-            ended: null, // meeting.ended,
-            peakUserCount: 0, // meeting.peakUserCount,
+            roomId: roomCode,
+            ended: ["done", "canceled", "no_show"].includes(response.data.status),
+            peakUserCount: response.data.peakUsers,
             id: meetingId,
-        }//meeting
+        }
 	}
 
 	async broadcastMessage(
@@ -195,6 +277,12 @@ export class ChatRoom extends Server<Env> {
 
 	async broadcastRoomState() {
 		const meetingId = await this.getMeetingId()
+        if (!meetingId) {
+            return this.broadcastMessage({
+                type: 'error',
+                error: 'No meetingId found, closing connection',
+            } satisfies ServerMessage)
+        }
 		const roomState = {
 			type: 'roomState',
 			state: {
@@ -389,17 +477,21 @@ export class ChatRoom extends Server<Env> {
 
 	async endMeeting(meetingId: string) {
 		log({ eventName: 'endingMeeting', meetingId })
-		/* if (this.db) {
-			// stamp meeting as ended
-			await this.db
-				.update(Meetings)
-				.set({
-					ended: sql`CURRENT_TIMESTAMP`,
-				})
-				.where(eq(Meetings.id, meetingId))
-		} */
-        // todo: set meeting as ended in the database
-		await this.ctx.storage.deleteAll()
+		const roomCode = await this.getRoomCode()
+        await this.ctx.storage.deleteAll()
+        if (!roomCode) {
+            console.warn('No room code found, cannot end meeting')
+            return
+        }
+        const meeting = await this.getMeeting(meetingId)
+        const ended = await this.updateMeetingStats(this.env, roomCode, {
+            peakUsers: meeting?.peakUserCount ?? 0,
+            status: 'done',
+        })
+        if (!ended) {
+            console.warn(`Failed to end meeting with id ${meetingId}`)
+            return
+        }
 	}
 
 	userLeftNotification(id: string) {
