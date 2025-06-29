@@ -18,18 +18,18 @@ const UserListItem: FC<{
 	audioTrack?: MediaStreamTrack
 	children?: ReactNode
 }> = ({ user, audioTrack }) => {
-	const { traceLink } = useRoomContext()
+	/* const { traceLink } = useRoomContext() */
 	const { data } = useUserMetadata(user.name)
 
 	return (
 		<li className="flex items-center gap-4 text-base h-9">
 			<div className="mr-auto overflow-hidden whitespace-nowrap text-ellipsis">
 				<OptionalLink
-					href={
+					/* href={
 						user.transceiverSessionId
 							? populateTraceLink(user.transceiverSessionId, traceLink)
 							: undefined
-					}
+					} */
 					target="_blank"
 					rel="noopener noreferrer"
 					className="flex items-center gap-3"

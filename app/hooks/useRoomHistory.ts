@@ -28,7 +28,7 @@ export function useRoomHistory(
 	useEffect(() => {
 		const handleHistory = () => {
 			setApiHistory(partyTracks.history.entries)
-			const entry = partyTracks.history.entries.at(-1)
+			const entry = partyTracks.history.entries[-1]
 			if (entry) {
 				room.websocket.send(
 					JSON.stringify({

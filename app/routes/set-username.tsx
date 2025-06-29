@@ -18,6 +18,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 	return setUsername(username, request, returnUrl)
 }
 
+// TODO: set login instead of username, user login with belead or linkedin
+
 export default function SetUsername() {
 	return (
 		<div className="grid h-full gap-4 place-content-center">

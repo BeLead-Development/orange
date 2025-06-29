@@ -4,20 +4,18 @@ import { OptionalLink } from '~/components/OptionalLink'
 import Toast, { useDispatchToast } from '~/components/Toast'
 import type { User } from '~/types/Messages'
 import populateTraceLink from '~/utils/populateTraceLink'
-import { useRoomContext } from './useRoomContext'
 import { useUserMetadata } from './useUserMetadata'
 
 function UserJoinedOrLeftToast(props: { user: User; type: 'joined' | 'left' }) {
-	const { traceLink } = useRoomContext()
 	const { data } = useUserMetadata(props.user.name)
 	return (
 		<div className="flex items-center justify-center gap-2 text-sm">
 			<Toast.Title>
 				<OptionalLink
 					href={
-						props.user.transceiverSessionId
+						/* props.user.transceiverSessionId
 							? populateTraceLink(props.user.transceiverSessionId, traceLink)
-							: undefined
+							: */ undefined
 					}
 					target="_blank"
 					rel="noopener noreferrer"

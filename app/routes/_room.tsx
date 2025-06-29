@@ -17,7 +17,6 @@ import { useRoomHistory } from '~/hooks/useRoomHistory'
 import { useStablePojo } from '~/hooks/useStablePojo'
 import useUserMedia from '~/hooks/useUserMedia'
 import type { TrackObject } from '~/utils/callsTypes'
-import { useE2EE } from '~/utils/e2ee'
 import { getIceServers } from '~/utils/getIceServers.server'
 import { mode } from '~/utils/mode'
 
@@ -34,32 +33,20 @@ function trackObjectToString(trackObject?: TrackObject) {
 export const loader = async ({ context }: LoaderFunctionArgs) => {
 	const {
 		env: {
-			TRACE_LINK,
-			API_EXTRA_PARAMS,
 			MAX_WEBCAM_FRAMERATE,
 			MAX_WEBCAM_BITRATE,
 			MAX_WEBCAM_QUALITY_LEVEL,
-			MAX_API_HISTORY,
 			EXPERIMENTAL_SIMULCAST_ENABLED,
 		},
 	} = context
 
 	return json({
 		userDirectoryUrl: context.env.USER_DIRECTORY_URL,
-		traceLink: TRACE_LINK,
-		apiExtraParams: API_EXTRA_PARAMS,
 		iceServers: await getIceServers(context.env),
-		feedbackEnabled: Boolean(
-			context.env.FEEDBACK_URL &&
-				context.env.FEEDBACK_QUEUE &&
-				context.env.FEEDBACK_STORAGE
-		),
 		maxWebcamFramerate: numberOrUndefined(MAX_WEBCAM_FRAMERATE),
 		maxWebcamBitrate: numberOrUndefined(MAX_WEBCAM_BITRATE),
 		maxWebcamQualityLevel: numberOrUndefined(MAX_WEBCAM_QUALITY_LEVEL),
-		maxApiHistory: numberOrUndefined(MAX_API_HISTORY),
 		simulcastEnabled: EXPERIMENTAL_SIMULCAST_ENABLED === 'true',
-		e2eeEnabled: context.env.E2EE_ENABLED === 'true',
 	})
 }
 
@@ -122,25 +109,19 @@ function Room({ room, userMedia }: RoomProps) {
 
 	const {
 		userDirectoryUrl,
-		traceLink,
-		feedbackEnabled,
-		apiExtraParams,
 		iceServers,
 		maxWebcamBitrate = 2_500_000,
 		maxWebcamFramerate = 24,
 		maxWebcamQualityLevel = 1080,
-		maxApiHistory = 100,
 		simulcastEnabled,
-		e2eeEnabled,
 	} = useLoaderData<typeof loader>()
 
-	const params = new URLSearchParams(apiExtraParams)
+	const params = new URLSearchParams()
 
 	invariant(room.roomState.meetingId, 'Meeting ID cannot be missing')
 	params.set('correlationId', room.roomState.meetingId)
 
 	const { partyTracks, iceConnectionState } = usePeerConnection({
-		maxApiHistory,
 		apiExtraParams: params.toString(),
 		iceServers,
 	})
@@ -214,12 +195,6 @@ function Room({ room, userMedia }: RoomProps) {
 	const [pinnedTileIds, setPinnedTileIds] = useState<string[]>([])
 	const [showDebugInfo, setShowDebugInfo] = useState(mode !== 'production')
 
-	const { e2eeSafetyNumber, onJoin } = useE2EE({
-		enabled: e2eeEnabled,
-		room,
-		partyTracks,
-	})
-
 	const context: RoomContextType = {
 		joined,
 		setJoined,
@@ -231,14 +206,10 @@ function Room({ room, userMedia }: RoomProps) {
 		setDataSaverMode,
 		audioOnlyMode,
 		setAudioOnlyMode,
-		traceLink,
 		userMedia,
 		userDirectoryUrl,
-		feedbackEnabled,
 		partyTracks,
 		roomHistory,
-		e2eeSafetyNumber,
-		e2eeOnJoin: onJoin,
 		iceConnectionState,
 		room,
 		simulcastEnabled,

@@ -6,8 +6,6 @@ import type useRoom from './useRoom'
 import type { useRoomHistory } from './useRoomHistory'
 
 export type RoomContextType = {
-	traceLink?: string
-	feedbackEnabled: boolean
 	userDirectoryUrl?: string
 	joined: boolean
 	setJoined: Dispatch<SetStateAction<boolean>>
@@ -25,8 +23,6 @@ export type RoomContextType = {
 	room: ReturnType<typeof useRoom>
 	roomHistory: ReturnType<typeof useRoomHistory>
 	simulcastEnabled: boolean
-	e2eeSafetyNumber?: string
-	e2eeOnJoin: (firstUser: boolean) => void
 	pushedTracks: {
 		video?: string
 		audio?: string

@@ -6,14 +6,16 @@ import { Icon } from './Icon/Icon'
 import { Tooltip } from './Tooltip'
 
 interface LeaveRoomButtonProps {
-	navigateToFeedbackPage: boolean
+	/* navigateToFeedbackPage: boolean */
 	meetingId?: string
 }
 
 export const LeaveRoomButton: FC<LeaveRoomButtonProps> = ({
-	navigateToFeedbackPage,
+	/* navigateToFeedbackPage, */
 	meetingId,
 }) => {
+    // TODO: add a feedback page form
+    const navigateToFeedbackPage = false // ! This should be a prop or state
 	const navigate = useNavigate()
 	return (
 		<Tooltip content="Leave">

@@ -7,14 +7,13 @@ import { Button } from './Button'
 import DropdownMenu from './DropdownMenu'
 import { Icon } from './Icon/Icon'
 import { participantCount, ParticipantsDialog } from './ParticipantsMenu'
-import { ReportBugDialog } from './ReportBugDialog'
 import { SettingsDialog } from './SettingsDialog'
 
 interface OverflowMenuProps {
-	bugReportsEnabled: boolean
+	/* bugReportsEnabled: boolean */
 }
 
-export const OverflowMenu: FC<OverflowMenuProps> = ({ bugReportsEnabled }) => {
+export const OverflowMenu: FC<OverflowMenuProps> = (/* { bugReportsEnabled } */) => {
 	const {
 		room: { otherUsers, identity },
 		dataSaverMode,
@@ -25,7 +24,6 @@ export const OverflowMenu: FC<OverflowMenuProps> = ({ bugReportsEnabled }) => {
 		userMedia: { turnCameraOff },
 	} = useRoomContext()
 	const [settingsMenuOpen, setSettingMenuOpen] = useState(false)
-	const [bugReportMenuOpen, setBugReportMenuOpen] = useState(false)
 	const [participantsMenuOpen, setParticipantsMenuOpen] = useState(false)
 	const roomUrl = useRoomUrl()
 	return (
@@ -70,7 +68,7 @@ export const OverflowMenu: FC<OverflowMenuProps> = ({ bugReportsEnabled }) => {
 							<Icon type="cog" className="mr-2" />
 							Settings
 						</DropdownMenu.Item>
-						{bugReportsEnabled && (
+						{/* {bugReportsEnabled && (
 							<DropdownMenu.Item
 								onSelect={() => {
 									setBugReportMenuOpen(true)
@@ -79,7 +77,7 @@ export const OverflowMenu: FC<OverflowMenuProps> = ({ bugReportsEnabled }) => {
 								<Icon type="bug" className="mr-2" />
 								Report bug
 							</DropdownMenu.Item>
-						)}
+						)} */}
 						<DropdownMenu.Item
 							className="md:hidden"
 							onSelect={() => {
@@ -96,9 +94,9 @@ export const OverflowMenu: FC<OverflowMenuProps> = ({ bugReportsEnabled }) => {
 			{settingsMenuOpen && (
 				<SettingsDialog open onOpenChange={setSettingMenuOpen} />
 			)}
-			{bugReportsEnabled && bugReportMenuOpen && (
+			{/* {bugReportsEnabled && bugReportMenuOpen && (
 				<ReportBugDialog onOpenChange={setBugReportMenuOpen} />
-			)}
+			)} */}
 			{participantsMenuOpen && (
 				<ParticipantsDialog
 					otherUsers={otherUsers}

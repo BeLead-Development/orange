@@ -1,6 +1,6 @@
 import invariant from 'tiny-invariant'
-import aiReady from './sounds/AIReady.mp3'
-import join from './sounds/Join.mp3'
+/* import aiReady from './sounds/AIReady.mp3'
+ */import join from './sounds/Join.mp3'
 import leave from './sounds/Leave.mp3'
 import raiseHand from './sounds/RaiseHand.mp3'
 
@@ -25,14 +25,14 @@ const sounds = {
 	leave,
 	join,
 	raiseHand,
-	aiReady,
+	/* aiReady, */
 }
 
 const volumeMap = {
-	join: 0.2,
+	join: 0.3,
 	leave: 0.2,
 	raiseHand: 0.1,
-	aiReady: 0.1,
+	/* aiReady: 0.1, */
 } satisfies Record<keyof typeof sounds, number>
 
 export async function playSound(sound: keyof typeof sounds) {

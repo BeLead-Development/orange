@@ -1,8 +1,6 @@
 import { type ActionFunctionArgs } from '@remix-run/cloudflare'
 import { Form, useSearchParams } from '@remix-run/react'
-import invariant from 'tiny-invariant'
 import { Button } from '~/components/Button'
-import { RELEASE } from '~/utils/constants'
 
 const redirectToHome = new Response(null, {
 	status: 302,

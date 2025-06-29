@@ -8,7 +8,6 @@ import {
 } from '@remix-run/react'
 import { useEffect, useState } from 'react'
 import { useMount, useWindowSize } from 'react-use'
-import { ButtonLink } from '~/components/Button'
 import { CameraButton } from '~/components/CameraButton'
 import { CopyButton } from '~/components/CopyButton'
 import { HighPacketLossWarningsToast } from '~/components/HighPacketLossWarningsToast'
@@ -19,8 +18,8 @@ import { OverflowMenu } from '~/components/OverflowMenu'
 import { ParticipantLayout } from '~/components/ParticipantLayout'
 import { ParticipantsButton } from '~/components/ParticipantsMenu'
 import { PullAudioTracks } from '~/components/PullAudioTracks'
-import { SafetyNumberToast } from '~/components/SafetyNumberToast'
-import { ScreenshareButton } from '~/components/ScreenshareButton'
+/* import { SafetyNumberToast } from '~/components/SafetyNumberToast'
+ */import { ScreenshareButton } from '~/components/ScreenshareButton'
 import Toast, { useDispatchToast } from '~/components/Toast'
 import useBroadcastStatus from '~/hooks/useBroadcastStatus'
 import useIsSpeaking from '~/hooks/useIsSpeaking'
@@ -29,7 +28,6 @@ import { useShowDebugInfoShortcut } from '~/hooks/useShowDebugInfoShortcut'
 import useSounds from '~/hooks/useSounds'
 import useStageManager from '~/hooks/useStageManager'
 import { useUserJoinLeaveToasts } from '~/hooks/useUserJoinLeaveToasts'
-import { dashboardLogsLink } from '~/utils/dashboardLogsLink'
 import getUsername from '~/utils/getUsername.server'
 import isNonNullable from '~/utils/isNonNullable'
 
@@ -38,17 +36,7 @@ export const loader = async ({ request, context }: LoaderFunctionArgs) => {
 
 	return json({
 		username,
-		bugReportsEnabled: Boolean(
-			context.env.FEEDBACK_URL &&
-				context.env.FEEDBACK_QUEUE &&
-				context.env.FEEDBACK_STORAGE
-		),
 		mode: context.mode,
-		hasDb: Boolean(context.env.DB),
-		hasAiCredentials: Boolean(
-			context.env.OPENAI_API_TOKEN && context.env.OPENAI_MODEL_ENDPOINT
-		),
-		dashboardDebugLogsBaseUrl: context.env.DASHBOARD_WORKER_URL,
 	})
 }
 
@@ -56,7 +44,7 @@ export default function Room() {
 	const { joined } = useRoomContext()
 	const navigate = useNavigate()
 	const { roomName } = useParams()
-	const { mode, bugReportsEnabled } = useLoaderData<typeof loader>()
+	const { mode } = useLoaderData<typeof loader>()
 	const [search] = useSearchParams()
 
 	useEffect(() => {
@@ -68,23 +56,19 @@ export default function Room() {
 
 	return (
 		<Toast.Provider>
-			<JoinedRoom bugReportsEnabled={bugReportsEnabled} />
+			<JoinedRoom />
 		</Toast.Provider>
 	)
 }
 
-function JoinedRoom({ bugReportsEnabled }: { bugReportsEnabled: boolean }) {
-	const { hasDb, hasAiCredentials, dashboardDebugLogsBaseUrl } =
-		useLoaderData<typeof loader>()
+function JoinedRoom() {
 	const {
 		userMedia,
 		partyTracks,
 		pushedTracks,
 		showDebugInfo,
 		pinnedTileIds,
-		room,
-		e2eeSafetyNumber,
-		e2eeOnJoin,
+		room
 	} = useRoomContext()
 	const {
 		otherUsers,
@@ -97,8 +81,8 @@ function JoinedRoom({ bugReportsEnabled }: { bugReportsEnabled: boolean }) {
 	const [firstUser] = useState(otherUsers.length === 0)
 
 	useEffect(() => {
-		e2eeOnJoin(firstUser)
-	}, [e2eeOnJoin, firstUser])
+
+	}, [firstUser])
 
 	useShowDebugInfoShortcut()
 
@@ -149,16 +133,6 @@ function JoinedRoom({ bugReportsEnabled }: { bugReportsEnabled: boolean }) {
 	)
 
 	const gridGap = 12
-	const dispatchToast = useDispatchToast()
-
-	useEffect(() => {
-		if (e2eeSafetyNumber) {
-			dispatchToast(
-				<SafetyNumberToast safetyNumber={e2eeSafetyNumber.slice(0, 8)} />,
-				{ duration: Infinity, id: 'e2ee-safety-number' }
-			)
-		}
-	}, [e2eeSafetyNumber, dispatchToast])
 
 	return (
 		<PullAudioTracks
@@ -198,32 +172,12 @@ function JoinedRoom({ bugReportsEnabled }: { bugReportsEnabled: boolean }) {
 						otherUsers={otherUsers}
 						className="hidden md:block"
 					></ParticipantsButton>
-					<OverflowMenu bugReportsEnabled={bugReportsEnabled} />
+					<OverflowMenu />
 					<LeaveRoomButton
-						navigateToFeedbackPage={hasDb}
 						meetingId={meetingId}
 					/>
 					{showDebugInfo && meetingId && (
 						<CopyButton contentValue={meetingId}>Meeting Id</CopyButton>
-					)}
-					{showDebugInfo && meetingId && dashboardDebugLogsBaseUrl && (
-						<ButtonLink
-							className="text-xs"
-							displayType="secondary"
-							to={dashboardLogsLink(dashboardDebugLogsBaseUrl, [
-								{
-									id: '2',
-									key: 'meetingId',
-									type: 'string',
-									value: meetingId,
-									operation: 'eq',
-								},
-							])}
-							target="_blank"
-							rel="noreferrer"
-						>
-							Meeting Logs
-						</ButtonLink>
 					)}
 				</div>
 			</div>

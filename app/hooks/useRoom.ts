@@ -13,7 +13,6 @@ export default function useRoom({
 }) {
 	const [roomState, setRoomState] = useState<RoomState>({
 		users: [],
-		ai: { enabled: false },
 	})
 
 	const userLeftFunctionRef = useRef(() => {})
@@ -43,7 +42,6 @@ export default function useRoom({
 					userMedia.turnMicOff()
 					break
 				case 'partyserver-pong':
-				case 'e2eeMlsMessage':
 				case 'userLeftNotification':
 					// do nothing
 					break

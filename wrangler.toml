@@ -18,6 +18,10 @@ class_name = "ChatRoom"
 tag = "v1"                     # Identifiant unique de cette migration
 new_sqlite_classes = ["ChatRoom"]  # Votre classe Durable Object
 
+[[services]]
+binding = "API"
+service = "belead-api"
+
 # The necessary secrets are:
 # - CALLS_APP_SECRET
 # To add secret, run `echo <VALUE> | wrangler secret put <NAME>`

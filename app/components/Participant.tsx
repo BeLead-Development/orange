@@ -3,7 +3,7 @@ import { useObservableAsValue } from 'partytracks/react'
 import { forwardRef, useMemo, useRef } from 'react'
 import { Flipped } from 'react-flip-toolkit'
 import { combineLatest, fromEvent, map, of, switchMap } from 'rxjs'
-import { useDeadPulledTrackMonitor } from '~/hooks/useDeadPulledTrackMonitor'
+/* import { useDeadPulledTrackMonitor } from '~/hooks/useDeadPulledTrackMonitor' */
 import useIsSpeaking from '~/hooks/useIsSpeaking'
 import { useRoomContext } from '~/hooks/useRoomContext'
 import { screenshareSuffix } from '~/hooks/useStageManager'
@@ -11,7 +11,7 @@ import { useUserMetadata } from '~/hooks/useUserMetadata'
 import { useVideoDimensions } from '~/hooks/useVideoDimensions'
 import type { User } from '~/types/Messages'
 import isNonNullable from '~/utils/isNonNullable'
-import populateTraceLink from '~/utils/populateTraceLink'
+/* import populateTraceLink from '~/utils/populateTraceLink' */
 import { ewma } from '~/utils/rxjs/ewma'
 import { getPacketLoss$ } from '~/utils/rxjs/getPacketLoss$'
 import { cn } from '~/utils/style'
@@ -25,8 +25,8 @@ import {
 } from './ConnectionIndicator'
 import { HoverFade } from './HoverFade'
 import { Icon } from './Icon/Icon'
-import { MuteUserButton } from './MuteUserButton'
-import { OptionalLink } from './OptionalLink'
+/* import { MuteUserButton } from './MuteUserButton'
+ */import { OptionalLink } from './OptionalLink'
 import { usePulledAudioTrack } from './PullAudioTracks'
 import { Spinner } from './Spinner'
 import { Tooltip } from './Tooltip'
@@ -61,7 +61,6 @@ export const Participant = forwardRef<
 >(({ user, style }, ref) => {
 	const { data } = useUserMetadata(user.name)
 	const {
-		traceLink,
 		partyTracks,
 		dataSaverMode,
 		simulcastEnabled,
@@ -98,7 +97,7 @@ export const Participant = forwardRef<
 	const videoTrack =
 		isSelf && !isScreenShare ? userMedia.videoStreamTrack : pulledVideoTrack
 
-	useDeadPulledTrackMonitor(
+	/* useDeadPulledTrackMonitor(
 		user.tracks.video,
 		identity?.transceiverSessionId,
 		!!user.tracks.video,
@@ -112,7 +111,7 @@ export const Participant = forwardRef<
 		!!user.tracks.audio,
 		audioTrack,
 		user.name
-	)
+	) */
 
 	const pinned = pinnedTileIds.includes(id)
 
@@ -135,14 +134,14 @@ export const Participant = forwardRef<
 
 	return (
 		<div
-			className="grow shrink text-base basis-[calc(var(--flex-container-width)_-_var(--gap)_*_3)]"
-			ref={ref}
+        className="grow shrink text-base basis-[calc(var(--flex-container-width)_-_var(--gap)_*_3)]"
+        ref={ref}
 			style={style}
 		>
 			<Flipped flipId={id + pinned}>
 				<div
 					className={cn(
-						'h-full mx-auto overflow-hidden text-white opacity-0 animate-fadeIn',
+						'h-full mx-auto overflow-hidden text-white bg-slate-900 opacity-0 animate-fadeIn',
 						'relative max-w-[--participant-max-width] rounded-xl'
 					)}
 				>
@@ -217,13 +216,13 @@ export const Participant = forwardRef<
 									<Icon type={pinned ? 'arrowsIn' : 'arrowsOut'} />
 								</Button>
 							</Tooltip>
-							{!isScreenShare && (
+							{/* {!isScreenShare && (
 								<MuteUserButton
 									displayType="ghost"
 									mutedDisplayType="ghost"
 									user={user}
 								/>
-							)}
+							)} */}
 						</div>
 					</HoverFade>
 					{audioTrack && !isScreenShare && (
@@ -255,7 +254,7 @@ export const Participant = forwardRef<
 							<ConnectionIndicator quality={getConnectionQuality(packetLoss)} />
 							<OptionalLink
 								className="leading-none text-sm"
-								href={populateTraceLink(user.transceiverSessionId, traceLink)}
+								/* href={populateTraceLink(user.transceiverSessionId, traceLink)} */
 								target="_blank"
 								rel="noopener noreferrer"
 							>
@@ -278,22 +277,6 @@ export const Participant = forwardRef<
 							</OptionalLink>
 						</div>
 					)}
-					<div className="absolute top-0 right-0 flex gap-4 p-4">
-						{user.raisedHand && !isScreenShare && (
-							<Tooltip content="Hand is raised">
-								<div className="relative">
-									<div className="relative">
-										<Icon className="indication-shadow" type="handRaised" />
-										<Icon
-											className="absolute top-0 left-0 text-indigo-300 animate-ping"
-											type="handRaised"
-										/>
-										<VisuallyHidden>Hand is raised</VisuallyHidden>
-									</div>
-								</div>
-							</Tooltip>
-						)}
-					</div>
 					{(isSpeaking || user.raisedHand) && !isScreenShare && (
 						<div
 							className={cn(
