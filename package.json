@@ -2,7 +2,6 @@
 	"name": "@belead/meets",
 	"scripts": {
 		"build": "remix build",
-		"build:e2ee-worker": "./rust-mls-worker/build.sh",
 		"lint": "prettier --check . && eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint --max-warnings=0 .",
 		"dev": "remix dev --manual -c \"npm start\"",
 		"start": "wrangler dev ./build/index.js ${WRANGLER_ARGS:-}",
@@ -17,16 +16,7 @@
 		"test": "vitest",
 		"test:ci": "vitest --watch false",
 		"test:e2e": "playwright test --headed",
-		"check": "npm run lint && npm run typecheck && npm run test:ci",
-		"db:generate": "drizzle-kit generate",
-		"db:migrate:local": "wrangler d1 migrations apply orange-meets-db-development -c wrangler.development.toml --local",
-		"db:migrate:development": "wrangler d1 migrations apply orange-meets-db-development -c wrangler.development.toml --remote",
-		"db:migrate:staging": "wrangler d1 migrations apply orange-meets-db-staging -c wrangler.staging.toml --remote",
-		"db:migrate:production": "wrangler d1 migrations apply orange-meets-db-production -c wrangler.production.toml --remote",
-		"db:studio:local": "LOCAL_DB_PATH=$(find .wrangler/state/v3/d1/miniflare-D1DatabaseObject -type f -name '*.sqlite' -print -quit) drizzle-kit studio",
-		"db:studio:development": "source .drizzle.env && DB_ID='6b0eceef-c836-4ba7-aac2-fa9b6f702e3b' drizzle-kit studio",
-		"db:studio:staging": "source .drizzle.env && DB_ID='e9091e61-7e0a-4719-b9cb-3e1c3e95e9fa' drizzle-kit studio",
-		"db:studio:production": "source .drizzle.env && DB_ID='125a3008-0a8a-4ada-a829-7d2eb2ef15bc' drizzle-kit studio"
+		"check": "npm run lint && npm run typecheck && npm run test:ci"
 	},
 	"dependencies": {
 		"@heroicons/react": "^2.2.0",
@@ -76,18 +66,15 @@
 		"@remix-run/eslint-config": "2.11.1",
 		"@types/react": "^18.3.18",
 		"@types/react-dom": "^18.3.5",
-		"better-sqlite3": "^11.9.0",
 		"del-cli": "^5.1.0",
 		"drizzle-kit": "^0.24.2",
 		"eslint": "^8.57.1",
 		"git-format-staged": "^3.1.1",
-		"msw": "^2.7.3",
 		"npm-run-all": "^4.1.5",
 		"prettier": "^3.5.3",
 		"prettier-plugin-organize-imports": "^4.1.0",
 		"tailwindcss": "^3.4.17",
 		"typescript": "^5.8.2",
-		"vitest": "1.5.0",
 		"wrangler": "^3.114.9"
 	},
 	"overrides": {

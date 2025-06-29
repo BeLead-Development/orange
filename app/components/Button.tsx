@@ -6,8 +6,8 @@ import { cn } from '~/utils/style'
 const displayTypeMap = {
 	primary: [
 		'text-white',
-		'bg-blue-500 hover:bg-blue-600 active:bg-blue-700 active:bg-blue-800',
-		'border-blue-500 hover:border-blue-600 active:border-blue-700 active:border-blue-800',
+		'bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700 active:bg-indigo-800',
+		'border-indigo-500 hover:border-indigo-600 active:border-indigo-700 active:border-indigo-800',
 	],
 	secondary: [
 		'text-zinc-900 dark:text-zinc-100',
@@ -35,7 +35,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 		<button
 			className={cn(
 				'border-4',
-				'rounded',
+				'rounded-2xl',
 				'uppercase',
 				'font-bold',
 				'tracking-widest',

@@ -17,3 +17,5 @@ test-results
 
 .yalc
 yalc.lock
+package-lock.json
+bun.lock

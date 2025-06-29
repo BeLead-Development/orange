@@ -8,7 +8,6 @@ import {
 } from '@remix-run/react'
 import { useEffect, useState } from 'react'
 import { useMount, useWindowSize } from 'react-use'
-import { AiButton } from '~/components/AiButton'
 import { ButtonLink } from '~/components/Button'
 import { CameraButton } from '~/components/CameraButton'
 import { CopyButton } from '~/components/CopyButton'
@@ -20,7 +19,6 @@ import { OverflowMenu } from '~/components/OverflowMenu'
 import { ParticipantLayout } from '~/components/ParticipantLayout'
 import { ParticipantsButton } from '~/components/ParticipantsMenu'
 import { PullAudioTracks } from '~/components/PullAudioTracks'
-// import { RaiseHandButton } from '~/components/RaiseHandButton'
 import { SafetyNumberToast } from '~/components/SafetyNumberToast'
 import { ScreenshareButton } from '~/components/ScreenshareButton'
 import Toast, { useDispatchToast } from '~/components/Toast'
@@ -166,8 +164,8 @@ function JoinedRoom({ bugReportsEnabled }: { bugReportsEnabled: boolean }) {
 		<PullAudioTracks
 			audioTracks={otherUsers.map((u) => u.tracks.audio).filter(isNonNullable)}
 		>
-			<div className="flex flex-col h-full bg-white dark:bg-zinc-800">
-				<div className="relative flex-grow bg-black isolate">
+			<div className="flex flex-col h-full bg-black">
+				<div className="relative flex-grow isolate">
 					<div
 						style={{ '--gap': gridGap + 'px' } as any}
 						className="absolute inset-0 flex isolate p-[--gap] gap-[--gap]"
@@ -192,14 +190,9 @@ function JoinedRoom({ bugReportsEnabled }: { bugReportsEnabled: boolean }) {
 					<Toast.Viewport className="absolute bottom-0 right-0" />
 				</div>
 				<div className="flex flex-wrap items-center justify-center gap-2 p-2 text-sm md:gap-4 md:p-5 md:text-base">
-					{hasAiCredentials && <AiButton recordActivity={recordActivity} />}
 					<MicButton warnWhenSpeakingWhileMuted />
 					<CameraButton />
 					<ScreenshareButton />
-					{/* <RaiseHandButton
-						raisedHand={raisedHand}
-						onClick={() => setRaisedHand(!raisedHand)}
-					/> */}
 					<ParticipantsButton
 						identity={identity}
 						otherUsers={otherUsers}

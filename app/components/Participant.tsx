@@ -285,7 +285,7 @@ export const Participant = forwardRef<
 									<div className="relative">
 										<Icon className="indication-shadow" type="handRaised" />
 										<Icon
-											className="absolute top-0 left-0 text-orange-300 animate-ping"
+											className="absolute top-0 left-0 text-indigo-300 animate-ping"
 											type="handRaised"
 										/>
 										<VisuallyHidden>Hand is raised</VisuallyHidden>
@@ -297,7 +297,7 @@ export const Participant = forwardRef<
 					{(isSpeaking || user.raisedHand) && !isScreenShare && (
 						<div
 							className={cn(
-								'pointer-events-none absolute inset-0 h-full w-full border-4 border-orange-400',
+								'pointer-events-none absolute inset-0 h-full w-full border-4 border-indigo-400',
 								!pinned && 'rounded-xl'
 							)}
 						></div>

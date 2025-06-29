@@ -1,6 +1,5 @@
 import { type ActionFunctionArgs } from '@remix-run/cloudflare'
 import { Form, useSearchParams } from '@remix-run/react'
-import { AnalyticsSimpleCallFeedback, getDb } from 'schema'
 import invariant from 'tiny-invariant'
 import { Button } from '~/components/Button'
 import { RELEASE } from '~/utils/constants'
@@ -13,7 +12,7 @@ const redirectToHome = new Response(null, {
 })
 
 export const action = async ({ request, context }: ActionFunctionArgs) => {
-	const db = getDb(context)
+	/* const db = getDb(context)
 	if (!db) return redirectToHome
 
 	const formData = await request.formData()
@@ -24,7 +23,7 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
 		experiencedIssues: Number(experiencedIssues),
 		version: RELEASE ?? 'dev',
 		meetingId,
-	})
+	}) */
 
 	return redirectToHome
 }

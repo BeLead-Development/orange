@@ -83,26 +83,7 @@ export type ClientMessage =
 			type: 'heartbeat'
 	  }
 	| {
-			type: 'enableAi'
-			instructions?: string
-			voice?: string
-	  }
-	| {
-			type: 'disableAi'
-	  }
-	| {
-			type: 'requestAiControl'
-			track: TrackObject
-	  }
-	| {
-			type: 'relenquishAiControl'
-	  }
-	| {
 			type: 'callsApiHistoryEntry'
 			entry: ApiHistoryEntry
 			sessionId?: string
-	  }
-	| {
-			type: 'e2eeMlsMessage'
-			payload: string
 	  }

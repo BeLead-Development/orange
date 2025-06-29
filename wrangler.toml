@@ -10,10 +10,6 @@ compatibility_flags = ["nodejs_compat"]
 [vars]
 CALLS_APP_ID = "c81a668b71372c891ecaf3e8a78e1d2b"
 
-# Optional vars
-OPENAI_MODEL_ENDPOINT = "https://api.openai.com/v1/realtime"
-OPENAI_MODEL_ID = "gpt-4o-mini-realtime-preview"
-
 [[durable_objects.bindings]]
 name = "rooms"
 class_name = "ChatRoom"

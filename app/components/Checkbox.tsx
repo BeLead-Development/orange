@@ -19,8 +19,8 @@ export const Checkbox: FC<RadixCheckbox.CheckboxProps> = ({
 			'items-center',
 			'justify-center',
 			'shadow',
-			'hover:bg-blue-200',
-			'dark:hover:bg-blue-900',
+			'hover:bg-indigo-200',
+			'dark:hover:bg-indigo-900',
 			'focus:shadow',
 			className
 		)}
