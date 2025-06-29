@@ -195,46 +195,12 @@ export class ChatRoom extends Server<Env> {
 
 	async broadcastRoomState() {
 		const meetingId = await this.getMeetingId()
-		const aiEnabled =
-			(await this.ctx.storage.get<boolean>('ai:enabled')) ?? false
-		const aiSessionId =
-			(await this.ctx.storage.get<string>('ai:sessionId')) ?? undefined
-		const aiAudioTrack =
-			(await this.ctx.storage.get<string>('ai:trackName')) ?? undefined
 		const roomState = {
 			type: 'roomState',
 			state: {
-				ai: {
-					enabled: aiEnabled,
-					controllingUser:
-						await this.ctx.storage.get<string>('ai:userControlling'),
-					connectionPending: await this.ctx.storage.get<boolean>(
-						'ai:connectionPending'
-					),
-					error: await this.ctx.storage.get<string>('ai:error'),
-				},
 				meetingId,
 				users: [
 					...(await this.getUsers()).values(),
-					...(aiEnabled
-						? [
-								{
-									id: 'ai',
-									name: 'AI',
-									joined: true,
-									raisedHand: false,
-									transceiverSessionId: aiSessionId,
-									speaking: false,
-									tracks: {
-										audioEnabled: true,
-										audio: aiSessionId + '/' + aiAudioTrack,
-										audioUnavailable: false,
-										videoEnabled: false,
-										screenShareEnabled: false,
-									},
-								} satisfies User,
-							]
-						: []),
 				],
 			},
 		} satisfies ServerMessage

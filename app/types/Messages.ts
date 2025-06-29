@@ -1,5 +1,4 @@
 import { type ApiHistoryEntry } from 'partytracks/client'
-import type { TrackObject } from '~/utils/callsTypes'
 
 export type User = {
 	id: string
@@ -22,12 +21,6 @@ export type User = {
 export type RoomState = {
 	meetingId?: string
 	users: User[]
-	ai: {
-		enabled: boolean
-		controllingUser?: string
-		error?: string
-		connectionPending?: boolean
-	}
 }
 
 export type ServerMessage =
@@ -49,10 +42,6 @@ export type ServerMessage =
 	  }
 	| {
 			type: 'partyserver-pong'
-	  }
-	| {
-			type: 'e2eeMlsMessage'
-			payload: string
 	  }
 	| {
 			type: 'userLeftNotification'

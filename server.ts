@@ -10,7 +10,6 @@ import * as build from '@remix-run/dev/server-build'
 // @ts-expect-error
 import manifestJSON from '__STATIC_CONTENT_MANIFEST'
 import { mode } from '~/utils/mode'
-import { queue } from './app/queue'
 
 import type { Env } from '~/types/Env'
 
@@ -96,7 +95,6 @@ export const createKvAssetHandler = (ASSET_MANIFEST: Record<string, string>) =>
 	}
 
 export { ChatRoom } from './app/durableObjects/ChatRoom.server'
-export { queue } from './app/queue'
 
 const kvAssetHandler = createKvAssetHandler(JSON.parse(manifestJSON))
 
@@ -105,6 +103,5 @@ export default {
 		const assetResponse = await kvAssetHandler(request, env, ctx, build)
 		if (assetResponse) return assetResponse
 		return remixHandler(request, { env, mode })
-	},
-	queue,
+	}
 }
